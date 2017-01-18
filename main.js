@@ -1,3 +1,5 @@
+'use strict';
+
 const electron = require('electron')
 // Module to control application life.
 const app = electron.app
@@ -6,6 +8,27 @@ const BrowserWindow = electron.BrowserWindow
 
 const path = require('path')
 const url = require('url')
+
+var globalShortcut = require('global-shortcut');
+var ipc = require('ipc');
+var remote = require('remote');
+var Tray = remote.require('tray');
+var Menu = remote.require('menu');
+var path = require('path');
+
+var trayIcon = null;
+
+if (process.platform === 'darwin'){
+    trayIcon = new Tray(path.join(__dirname, 'trayIcon.png'));
+}else{
+    trayIcon = new Tray(path.join(__dirname, 'trayIcon-alt.png'));
+}
+
+var trayMenuTemplate = [
+  {
+      
+  }
+]
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -32,6 +55,15 @@ function createWindow () {
     // when you should delete the corresponding element.
     mainWindow = null
   })
+
+  globalShortcut.register('ctrl+shift+1', function(){
+      mainWindow.webContents.send('global-shortcut',0);
+  });
+
+  globalShortcut.register('ctrl+shift+2', function(){
+      mainWindow.webContents.send('global-shortcut',1);
+  });
+
 }
 
 // This method will be called when Electron has finished
@@ -58,3 +90,8 @@ app.on('activate', function () {
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
+
+ipc.on('global-shortcut', function(arg){
+    var event = new MouseEvent('click');
+    soundButtons[arg].dispatchEvent(event);
+});
